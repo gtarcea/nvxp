@@ -611,6 +611,10 @@ class View(utils.SubjectMixin):
     def cmd_root_delete(self, evt=None):
         sidx = self.notes_list.selected_idx
         self.notify_observers('delete:note', utils.KeyValueObject(sel=sidx))
+
+    def cmd_external_edit(self, evt=None):
+        selected_index = self.notes_list.selected_idx
+        self.notify_observers('external-edit:note', utils.KeyValueObject(sel = selected_index))
         
     def cmd_root_new(self, evt=None):
         # this'll get caught by a controller event handler
@@ -798,6 +802,10 @@ class View(utils.SubjectMixin):
         file_menu.add_command(label = "Delete note", underline=0,
                               command=self.cmd_root_delete, accelerator="Ctrl+D")        
         self.root.bind_all("<Control-d>", self.cmd_root_delete)
+
+        file_menu.add_command(label = "Edit note", underline=0,
+                            command = self.cmd_external_edit, accelerator = "Ctrl+E")
+        self.root.bind_all("<Control-e>", self.cmd_external_edit)
         
         file_menu.add_separator()
         

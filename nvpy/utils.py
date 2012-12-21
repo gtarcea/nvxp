@@ -19,14 +19,14 @@ def generate_random_key():
     return '%030x' % (random.randrange(256**15),)
 
 def get_note_title(note):
-    mo = note_title_re.match(note.get('content', ''))
+    mo = note_title_re.match(note.get('title', ''))
     if mo:
         return mo.groups()[0]
     else:
         return ''
 
 def get_note_title_file(note):
-    mo = note_title_re.match(note.get('content', ''))
+    mo = note_title_re.match(note.get('title', ''))
     if mo:
         fn = mo.groups()[0]
         fn = fn.replace(' ', '_')

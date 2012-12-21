@@ -126,12 +126,16 @@ class NotesDB(utils.SubjectMixin):
                     raise ReadError ('Error reading note file')
 
                 else:
-                    nk = self.create_note(c)
                     nn = os.path.splitext(os.path.basename(fn))[0]
-                    if nn != utils.get_note_title(self.notes[nk]):
-                        self.notes[nk]['content'] = nn + "\n\n" + c
+                    nk = self.create_note(nn)
+                    self.notes[nk]['content'] = c
+                    #if nn != utils.get_note_title(self.notes[nk]):
+                    #    logging.debug('nn: %s, title: %s' % (nn, utils.get_note_title(self.notes[nk])))
+                    #    logging.debug('tfn: %s' % (tfn))
+                    #    #self.notes[nk]['content'] = nn + "\n\n" + c
+                    #    self.notes[nk]['content'] = c
 
-                    os.unlink(tfn)
+                    # os.unlink(tfn)
 
 
         # save and sync queue
@@ -175,7 +179,8 @@ class NotesDB(utils.SubjectMixin):
             
         # note has no internal key yet.
         new_note = {
-                    'content' : title,
+                    'content' : "",
+                    'title': title,
                     'modifydate' : timestamp,
                     'createdate' : timestamp,
                     'savedate' : 0, # never been written to disc
@@ -322,7 +327,7 @@ class NotesDB(utils.SubjectMixin):
 
             if not n.get('deleted'):
                 active_notes += 1
-                c = n.get('content')
+                c = n.get('content') + ' ' + n.get('title')
 
                 # case insensitive mode: WARNING - SLOW!
                 if not self.config.case_sensitive and c:
@@ -371,7 +376,7 @@ class NotesDB(utils.SubjectMixin):
 
             active_notes += 1
 
-            c = n.get('content')
+            c = n.get('content') + ' ' + n.get('title')
             if self.config.search_tags == 1:
                 t = n.get('tags')
                 if sspat:
@@ -498,8 +503,16 @@ class NotesDB(utils.SubjectMixin):
         """
 
         note = self.notes[k]
-        
-        if not note.get('key') or float(note.get('modifydate')) > float(note.get('syncdate')):
+
+        if self.config.notes_as_txt:
+            with codecs.open(tfn, mode='rb', encoding='utf-8') as f:  
+                content = f.read()
+                n = note
+                n['content'] = content
+                n['modifydate'] = os.path.getmtime(tfn)
+            note.update(n)
+            return (k, True)
+        elif not note.get('key') or float(note.get('modifydate')) > float(note.get('syncdate')):
             # if has no key, or it has been modified sync last sync, 
             # update to server
             uret = self.simplenote.update_note(note)
@@ -797,6 +810,10 @@ class NotesDB(utils.SubjectMixin):
         self.notify_observers('progress:sync_full', utils.KeyValueObject(msg='Full sync complete.'))
 
         return sync_from_server_errors
+
+    def get_note_filepath(self, note_key):
+        filename = os.path.join(self.config.txt_path, utils.get_note_title_file(self.notes[note_key])) 
+        return filename
         
     def set_note_content(self, key, content):
         n = self.notes[key]

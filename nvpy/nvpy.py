@@ -269,6 +269,7 @@ class Controller:
         self.view.add_observer('change:tags', self.observer_view_change_tags)
         self.view.add_observer('change:pinned', self.observer_view_change_pinned)
         self.view.add_observer('create:note', self.observer_view_create_note)
+        self.view.add_observer('external-edit:note', self.observer_view_external_edit_note)
         self.view.add_observer('keep:house', self.observer_view_keep_house)
         self.view.add_observer('command:markdown',
                 self.observer_view_markdown)
@@ -357,6 +358,13 @@ class Controller:
             # because nvpy kicks ass, it then assumes the contents of [[]]
             # to be a new regular expression to search for in the notes db.
             self.view.set_search_entry_text(note_name)
+
+    def observer_view_external_edit_note(self, view, evt_type, evt):
+        # Launch external editor
+        key = self.get_selected_note_key()
+        filepath = self.notes_db.get_note_filepath(key)
+        os.system("open -a FoldingText " + filepath)
+
 
     def observer_view_delete_note(self, view, evt_type, evt):
         # delete note from notes_db
