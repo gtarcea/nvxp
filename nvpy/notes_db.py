@@ -322,8 +322,11 @@ class NotesDB(utils.SubjectMixin):
                 if gi[mi]:
                     tms_pats[mi-1].append(gi[mi])
 
+        logging.debug("===== starting new search %s =====", (search_string))
+
         for k in self.notes:
             n = self.notes[k]
+            logging.debug("searching note %s", (n.get('title')))
 
             if not n.get('deleted'):
                 active_notes += 1
@@ -505,6 +508,7 @@ class NotesDB(utils.SubjectMixin):
         note = self.notes[k]
 
         if self.config.notes_as_txt:
+            tfn = self.get_note_filepath(k)
             with codecs.open(tfn, mode='rb', encoding='utf-8') as f:  
                 content = f.read()
                 n = note

@@ -278,7 +278,7 @@ class Controller:
 
         if self.config.simplenote_sync:
             self.view.add_observer('command:sync_full', lambda v, et, e: self.sync_full())
-            self.view.add_observer('command:sync_current_note', self.observer_view_sync_current_note)
+        self.view.add_observer('command:sync_current_note', self.observer_view_sync_current_note)
 
         self.view.add_observer('close', self.observer_view_close)
 
@@ -509,6 +509,7 @@ class Controller:
         self.select_note(evt.sel)
 
     def observer_view_sync_current_note(self, view, evt_type, evt):
+        logging.debug("in observer_view_sync_current_note")
         if self.selected_note_idx >= 0:
             key = self.notes_list_model.list[self.selected_note_idx].key
             # this call will update our in-memory version if necessary

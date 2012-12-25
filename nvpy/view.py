@@ -805,7 +805,7 @@ class View(utils.SubjectMixin):
 
         file_menu.add_command(label = "Edit note", underline=0,
                             command = self.cmd_external_edit, accelerator = "Ctrl+E")
-        self.root.bind_all("<Control-e>", self.cmd_external_edit)
+        self.root.bind_all("<Command-e>", self.cmd_external_edit)
         
         file_menu.add_separator()
         
