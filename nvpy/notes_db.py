@@ -31,9 +31,12 @@ class ReadError(RuntimeError):
 class WriteError(RuntimeError):
     pass
 
+
+
 class NotesDB(utils.SubjectMixin):
     """NotesDB will take care of the local notes database and syncing with SN.
     """
+
     def __init__(self, config):
         utils.SubjectMixin.__init__(self)
         
@@ -48,97 +51,8 @@ class NotesDB(utils.SubjectMixin):
         # create txt Notes dir if it does not exist
         if self.config.notes_as_txt and not os.path.exists(config.txt_path):
             os.mkdir(config.txt_path)
-        
-        now = time.time()    
-        # now read all .json files from disk
-        fnlist = glob.glob(self.helper_key_to_fname('*'))
-        txtlist = glob.glob(unicode(self.config.txt_path + '/*' + self.config.note_extension, 'utf-8'))
-        txtlist += glob.glob(unicode(self.config.txt_path + '/*.mkdn', 'utf-8'))
 
-        # removing json files and force full full sync if using text files
-        # and none exists and json files are there
-        if self.config.notes_as_txt and not txtlist and fnlist:
-            logging.debug('Forcing resync: using text notes, first usage')
-            for fn in fnlist:
-                os.unlink(fn)
-            fnlist = []
-
-        self.notes = {}
-        if self.config.notes_as_txt:
-            self.titlelist = {}
-
-        for fn in fnlist:
-            try:
-                n = json.load(open(fn, 'rb'))
-                if self.config.notes_as_txt:
-                    nt = utils.get_note_title_file(n, self.config.note_extension)
-                    tfn = os.path.join(self.config.txt_path, nt)
-                    if os.path.isfile(tfn):
-                        self.titlelist[n.get('key')] = nt
-                        txtlist.remove(tfn)
-                        if os.path.getmtime(tfn) > os.path.getmtime(fn):
-                            logging.debug('Text note was changed: %s' % (fn,))
-                            with codecs.open(tfn, mode='rb', encoding='utf-8') as f:  
-                                c = f.read()
-
-                            n['content'] = c
-                            n['modifydate'] = os.path.getmtime(tfn)
-                    else:
-                        logging.debug('Deleting note : %s' % (fn,))
-                        if not self.config.simplenote_sync:
-                            os.unlink(fn)
-                            continue
-                        else:
-                            n['deleted'] = 1
-                            n['modifydate'] = now
-
-            except IOError, e:
-                logging.error('NotesDB_init: Error opening %s: %s' % (fn, str(e)))
-                raise ReadError ('Error opening note file')
-
-            except ValueError, e:
-                logging.error('NotesDB_init: Error reading %s: %s' % (fn, str(e)))
-                raise ReadError ('Error reading note file')
-
-            else:
-                # we always have a localkey, also when we don't have a note['key'] yet (no sync)
-                localkey = os.path.splitext(os.path.basename(fn))[0]
-                self.notes[localkey] = n
-                # we maintain in memory a timestamp of the last save
-                # these notes have just been read, so at this moment
-                # they're in sync with the disc.
-                n['savedate'] = now
-        
-        if self.config.notes_as_txt:
-            for fn in txtlist:
-                logging.debug('New text note found : %s' % (fn),)
-                tfn = os.path.join(self.config.txt_path, fn)
-                try:
-                    with codecs.open(tfn, mode='rb', encoding='utf-8') as f:  
-                        c = f.read()
-
-                except IOError, e:
-                    logging.error('NotesDB_init: Error opening %s: %s' % (fn, str(e)))
-                    raise ReadError ('Error opening note file')
-
-                except ValueError, e:
-                    logging.error('NotesDB_init: Error reading %s: %s' % (fn, str(e)))
-                    raise ReadError ('Error reading note file')
-
-                else:
-                    nn = os.path.splitext(os.path.basename(fn))[0]
-                    nk = self.create_note(nn)
-                    self.notes[nk]['content'] = c
-                    #if nn != utils.get_note_title(self.notes[nk]):
-                    #    logging.debug('nn: %s, title: %s' % (nn, utils.get_note_title(self.notes[nk])))
-                    #    logging.debug('tfn: %s' % (tfn))
-                    #    #self.notes[nk]['content'] = nn + "\n\n" + c
-                    #    self.notes[nk]['content'] = c
-
-                    # os.unlink(tfn)
-
-
-        # save and sync queue
+        self.initialize_on_disk_notes()# save and sync queue
         self.q_save = Queue()
         self.q_save_res = Queue()
 
@@ -191,7 +105,92 @@ class NotesDB(utils.SubjectMixin):
         self.notes[new_key] = new_note
         
         return new_key
-    
+
+    def initialize_on_disk_notes(self):
+        now = time.time()
+        # now read all .json files from disk
+        fnlist = glob.glob(self.helper_key_to_fname('*'))
+        txtlist = glob.glob(unicode(self.config.txt_path + '/*' + self.config.note_extension, 'utf-8'))
+        txtlist += glob.glob(unicode(self.config.txt_path + '/*.mkdn', 'utf-8'))
+        # removing json files and force full full sync if using text files
+        # and none exists and json files are there
+        if self.config.notes_as_txt and not txtlist and fnlist:
+            logging.debug('Forcing resync: using text notes, first usage')
+            for fn in fnlist:
+                os.unlink(fn)
+            fnlist = []
+        self.notes = {}
+        if self.config.notes_as_txt:
+            self.titlelist = {}
+        for fn in fnlist:
+            try:
+                n = json.load(open(fn, 'rb'))
+                if self.config.notes_as_txt:
+                    nt = utils.get_note_title_file(n, self.config.note_extension)
+                    tfn = os.path.join(self.config.txt_path, nt)
+                    if os.path.isfile(tfn):
+                        self.titlelist[n.get('key')] = nt
+                        txtlist.remove(tfn)
+                        if os.path.getmtime(tfn) > os.path.getmtime(fn):
+                            logging.debug('Text note was changed: %s' % (fn,))
+                            with codecs.open(tfn, mode='rb', encoding='utf-8') as f:
+                                c = f.read()
+
+                            n['content'] = c
+                            n['modifydate'] = os.path.getmtime(tfn)
+                    else:
+                        logging.debug('Deleting note : %s' % (fn,))
+                        if not self.config.simplenote_sync:
+                            os.unlink(fn)
+                            continue
+                        else:
+                            n['deleted'] = 1
+                            n['modifydate'] = now
+
+            except IOError, e:
+                logging.error('NotesDB_init: Error opening %s: %s' % (fn, str(e)))
+                raise ReadError('Error opening note file')
+
+            except ValueError, e:
+                logging.error('NotesDB_init: Error reading %s: %s' % (fn, str(e)))
+                raise ReadError('Error reading note file')
+
+            else:
+                # we always have a localkey, also when we don't have a note['key'] yet (no sync)
+                localkey = os.path.splitext(os.path.basename(fn))[0]
+                self.notes[localkey] = n
+                # we maintain in memory a timestamp of the last save
+                # these notes have just been read, so at this moment
+                # they're in sync with the disc.
+                n['savedate'] = now
+        if self.config.notes_as_txt:
+            for fn in txtlist:
+                logging.debug('New text note found : %s' % (fn), )
+                tfn = os.path.join(self.config.txt_path, fn)
+                try:
+                    with codecs.open(tfn, mode='rb', encoding='utf-8') as f:
+                        c = f.read()
+
+                except IOError, e:
+                    logging.error('NotesDB_init: Error opening %s: %s' % (fn, str(e)))
+                    raise ReadError('Error opening note file')
+
+                except ValueError, e:
+                    logging.error('NotesDB_init: Error reading %s: %s' % (fn, str(e)))
+                    raise ReadError('Error reading note file')
+
+                else:
+                    nn = os.path.splitext(os.path.basename(fn))[0]
+                    nk = self.create_note(nn)
+                    self.notes[nk]['content'] = c
+                    #if nn != utils.get_note_title(self.notes[nk]):
+                    #    logging.debug('nn: %s, title: %s' % (nn, utils.get_note_title(self.notes[nk])))
+                    #    logging.debug('tfn: %s' % (tfn))
+                    #    #self.notes[nk]['content'] = nn + "\n\n" + c
+                    #    self.notes[nk]['content'] = c
+
+                    # os.unlink(tfn)
+
     def delete_note(self, key):
         n = self.notes[key]
         n['deleted'] = 1
@@ -693,7 +692,10 @@ class NotesDB(utils.SubjectMixin):
                 del self.threaded_syncing_keys[okey]
 
         return (nsynced, nerrored)
-    
+
+    def sync_local_changes(self):
+        logging.debug("in sync_local_changes")
+        self.initialize_on_disk_notes()
     
     def sync_full(self):
         """Perform a full bi-directional sync with server.
@@ -702,6 +704,9 @@ class NotesDB(utils.SubjectMixin):
         After this, it could be that local keys have been changed, so
         reset any views that you might have.
         """
+        if self.config.notes_as_txt:
+            self.sync_local_changes()
+            return
         
         local_updates = {}
         local_deletes = {}

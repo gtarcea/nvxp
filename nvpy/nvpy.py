@@ -278,8 +278,7 @@ class Controller:
         self.view.add_observer('command:rest',
                 self.observer_view_rest)
 
-        if self.config.simplenote_sync:
-            self.view.add_observer('command:sync_full', lambda v, et, e: self.sync_full())
+        self.view.add_observer('command:sync_full', lambda v, et, e: self.sync_full())
         self.view.add_observer('command:sync_current_note', self.observer_view_sync_current_note)
 
         self.view.add_observer('close', self.observer_view_close)

@@ -810,7 +810,9 @@ class View(utils.SubjectMixin):
         file_menu.add_separator()
         
         file_menu.add_command(label = "Sync full", underline=5,
-                              command=self.cmd_sync_full)
+                              command=self.cmd_sync_full, accelerator="Ctrl+Shift+S")
+        self.root.bind_all("<Control-S>", self.cmd_sync_full)
+
         file_menu.add_command(label = "Sync current note",
                 underline=0, command=self.cmd_sync_current_note,
                 accelerator="Ctrl+S")
