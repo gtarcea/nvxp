@@ -79,6 +79,7 @@ class Config:
                     'home' : home,
                     'notes_as_txt' : '0',
                     'housekeeping_interval' : '2',
+                    'note_extension': '.txt',
                     'search_mode' : 'gstyle',
                     'case_sensitive' : '1',
                     'search_tags' : '1',
@@ -150,6 +151,7 @@ class Config:
         self.print_columns = cp.getint(cfg_sec, 'print_columns')
 
         self.background_color = cp.get(cfg_sec, 'background_color')
+        self.note_extension = cp.get(cfg_sec, 'note_extension')
 
         self.rest_css_path = cp.get(cfg_sec, 'rest_css_path')
 

@@ -52,7 +52,7 @@ class NotesDB(utils.SubjectMixin):
         now = time.time()    
         # now read all .json files from disk
         fnlist = glob.glob(self.helper_key_to_fname('*'))
-        txtlist = glob.glob(unicode(self.config.txt_path + '/*.txt', 'utf-8'))
+        txtlist = glob.glob(unicode(self.config.txt_path + '/*' + self.config.note_extension, 'utf-8'))
         txtlist += glob.glob(unicode(self.config.txt_path + '/*.mkdn', 'utf-8'))
 
         # removing json files and force full full sync if using text files
@@ -71,7 +71,7 @@ class NotesDB(utils.SubjectMixin):
             try:
                 n = json.load(open(fn, 'rb'))
                 if self.config.notes_as_txt:
-                    nt = utils.get_note_title_file(n)
+                    nt = utils.get_note_title_file(n, self.config.note_extension)
                     tfn = os.path.join(self.config.txt_path, nt)
                     if os.path.isfile(tfn):
                         self.titlelist[n.get('key')] = nt
@@ -449,7 +449,7 @@ class NotesDB(utils.SubjectMixin):
         """
 
         if self.config.notes_as_txt:
-            t = utils.get_note_title_file(note)
+            t = utils.get_note_title_file(note, self.config.note_extension)
             if t and not note.get('deleted'):
                 if k in self.titlelist:
                     logging.debug('Writing note : %s %s' % (t,self.titlelist[k] ))
@@ -792,7 +792,7 @@ class NotesDB(utils.SubjectMixin):
         for lk in self.notes.keys():
             if lk not in server_keys:
                 if self.config.notes_as_txt:
-                    tfn = os.path.join(self.config.txt_path, utils.get_note_title_file(self.notes[lk]))
+                    tfn = os.path.join(self.config.txt_path, utils.get_note_title_file(self.notes[lk], self.config.note_extension))
                     if os.path.isfile(tfn):
                         os.unlink(tfn)
                 del self.notes[lk]
@@ -816,7 +816,7 @@ class NotesDB(utils.SubjectMixin):
         return sync_from_server_errors
 
     def get_note_filepath(self, note_key):
-        filename = os.path.join(self.config.txt_path, utils.get_note_title_file(self.notes[note_key])) 
+        filename = os.path.join(self.config.txt_path, utils.get_note_title_file(self.notes[note_key], self.config.note_extension))
         return filename
         
     def set_note_content(self, key, content):

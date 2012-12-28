@@ -25,7 +25,10 @@ def get_note_title(note):
     else:
         return ''
 
-def get_note_title_file(note):
+def get_note_title_file(note, note_extension):
+    """
+    @type note_extension: basestring
+    """
     mo = note_title_re.match(note.get('title', ''))
     if mo:
         fn = mo.groups()[0]
@@ -42,7 +45,8 @@ def get_note_title_file(note):
         if note_markdown(note):
             fn += '.mkdn'
         else:
-            fn += '.txt'
+            #fn += '.txt'
+            fn += note_extension
 
         return fn
     else:
