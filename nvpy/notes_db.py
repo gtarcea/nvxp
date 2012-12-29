@@ -184,8 +184,10 @@ class NotesDB(utils.SubjectMixin):
 
         if self.config.search_mode == 'regexp':
             filtered_notes, match_regexp, active_notes = self.filter_notes_regexp(search_string)
-        else:
+        elif self.config.search_mode == 'gstyle':
             filtered_notes, match_regexp, active_notes = self.filter_notes_gstyle(search_string)
+        else:
+            filtered_notes, match_regexp, active_notes = self.filter_notes_find(search_string)
 
         if self.config.sort_mode == 0:
             if self.config.pinned_ontop == 0:
@@ -382,6 +384,33 @@ class NotesDB(utils.SubjectMixin):
         match_regexp = search_string if sspat else ''
 
         return filtered_notes, match_regexp, active_notes
+
+    def filter_notes_find(self, search_string):
+        """
+        filters out notes using str.find
+        @param search_string:
+        @return:
+        """
+        filtered_notes = []
+        active_notes = 0
+        print("searching: %d" % (len(self.notes.values())))
+        for note_key in self.notes:
+            note = self.notes[note_key]
+            if note.get('deleted'):
+                continue
+
+            active_notes += 1
+
+            #
+            # Skip searching tags for now
+            #
+            content_to_search = note.get('content') + ' ' + note.get('title')
+            if not search_string:
+                filtered_notes.append(utils.KeyValueObject(key = note_key, note = note, tagfound = 0))
+            elif content_to_search.find(search_string) != -1:
+                filtered_notes.append(utils.KeyValueObject(key = note_key, note = note, tagfound = 0))
+
+        return filtered_notes, '', active_notes
 
 
     def get_note(self, key):
