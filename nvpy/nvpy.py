@@ -77,7 +77,6 @@ class Config:
         defaults = {'app_dir' : app_dir,
                     'appdir' : app_dir,
                     'home' : home,
-                    'notes_as_txt' : '0',
                     'housekeeping_interval' : '2',
                     'note_extension': '.txt',
                     'search_mode' : 'gstyle',
@@ -95,9 +94,6 @@ class Config:
                     'layout' : 'horizontal',
                     'print_columns' : '0',
                     'background_color' : 'white',
-                    'sn_username' : '',
-                    'sn_password' : '',
-                    'simplenote_sync' : '1',
                     # Filename or filepath to a css file used style the rendered
                     # output; e.g. nvpy.css or /path/to/my.css
                     'rest_css_path': None,
@@ -121,20 +117,16 @@ class Config:
         else:
             self.ok = True
 
-        # for the username and password, we don't want interpolation,
-        # hence the raw parameter. Fixes
-        # https://github.com/cpbotha/nvpy/issues/9
-        self.sn_username = cp.get(cfg_sec, 'sn_username', raw=True)
-        self.sn_password = cp.get(cfg_sec, 'sn_password', raw=True)
-        self.simplenote_sync = cp.getint(cfg_sec, 'simplenote_sync')
-        # make logic to find in $HOME if not set
+        # TODO: make logic to find in $HOME if not set
         self.db_path = cp.get(cfg_sec, 'db_path')
-        #  0 = alpha sort, 1 = last modified first
-        self.notes_as_txt = cp.getint(cfg_sec, 'notes_as_txt')
+
+
         self.txt_path = os.path.join(home, cp.get(cfg_sec, 'txt_path'))
         self.search_mode = cp.get(cfg_sec, 'search_mode')
         self.case_sensitive = cp.getint(cfg_sec, 'case_sensitive')
         self.search_tags = cp.getint(cfg_sec, 'search_tags')
+
+        #  0 = alpha sort, 1 = last modified first
         self.sort_mode = cp.getint(cfg_sec, 'sort_mode')
         self.pinned_ontop = cp.getint(cfg_sec, 'pinned_ontop')
         self.housekeeping_interval = cp.getint(cfg_sec, 'housekeeping_interval')
@@ -225,8 +217,6 @@ class Controller:
 
         logging.debug('config read from %s' % (str(self.config.files_read),))
 
-        if self.config.sn_username == '':
-            self.config.simplenote_sync = 0
 
         css = self.config.rest_css_path
         if css:
@@ -257,9 +247,6 @@ class Controller:
         self.notes_db.add_observer('synced:note', self.observer_notes_db_synced_note)
         self.notes_db.add_observer('change:note-status', self.observer_notes_db_change_note_status)
 
-        if self.config.simplenote_sync:
-            self.notes_db.add_observer('progress:sync_full', self.observer_notes_db_sync_full)
-            self.sync_full()
 
         # we want to be notified when the user does stuff
         self.view.add_observer('click:notelink',
@@ -476,17 +463,11 @@ class Controller:
 
         saven = self.notes_db.get_save_queue_len()
 
-        if self.config.simplenote_sync:
-            syncn = self.notes_db.get_sync_queue_len()
-            wfsn = self.notes_db.waiting_for_simplenote
-        else:
-            syncn = wfsn = 0
-
         savet = 'Saving %d notes.' % (saven,) if saven > 0 else '';
-        synct = 'Waiting to sync %d notes.' % (syncn,) if syncn > 0 else '';
-        wfsnt = 'Syncing with simplenote server.' if wfsn else '';
 
-        return ' '.join([i for i in [savet, synct, wfsnt] if i])
+        # TODO: Cleanup here - we don't need to join on a single item
+
+        return ' '.join([i for i in [savet] if i])
 
 
     def observer_view_keep_house(self, view, evt_type, evt):
@@ -494,14 +475,9 @@ class Controller:
         nsaved = self.notes_db.save_threaded()
         msg = self.helper_save_sync_msg()
 
-        if self.config.simplenote_sync:
-            nsynced, sync_errors = self.notes_db.sync_to_server_threaded()
-            if sync_errors:
-                msg = ' '.join([i for i in [msg, 'Could not connect to simplenote server.'] if i])
-
         self.view.set_status_text(msg)
 
-        # in continous rendering mode, we also generate a new HTML
+        # in continuous rendering mode, we also generate a new HTML
         # the browser, if open, will refresh!
         if self.view.get_continuous_rendering():
             self.helper_markdown_to_html()
@@ -618,18 +594,12 @@ class Controller:
 
         # first make sure all our queues are up to date
         self.notes_db.save_threaded()
-        if self.config.simplenote_sync:
-            self.notes_db.sync_to_server_threaded(wait_for_idle=False)
-            syncn = self.notes_db.get_sync_queue_len()
-            wfsn = self.notes_db.waiting_for_simplenote
-        else:
-            syncn = wfsn = 0
 
         # then check all queues
         saven = self.notes_db.get_save_queue_len()
 
         # if there's still something to do, warn the user.
-        if saven or syncn or wfsn:
+        if saven:
             msg = "Are you sure you want to exit? I'm still busy: " + self.helper_save_sync_msg()
             really_want_to_exit = self.view.askyesno("Confirm exit", msg)
 
