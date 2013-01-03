@@ -431,8 +431,8 @@ class NotesDB(utils.SubjectMixin):
         else:
             obj.modified = True
 
-        if float(note.syncdate) > modifydate:
-            obj.synced = True
+        # if float(note.syncdate) > modifydate:
+        #    obj.synced = True
 
         return obj
 
@@ -529,8 +529,8 @@ class NotesDB(utils.SubjectMixin):
     def save_threaded(self):
         for key, note in self.notes.items():
             savedate = float(note.savedate)
-            if float(note.modifydate) > savedate or \
-                    float(note.syncdate) > savedate:
+            if float(note.modifydate) > savedate:  # or \
+                    # float(note.syncdate) > savedate:
                 cn = copy.deepcopy(note)
                 # put it on my queue as a save
                 o = utils.KeyValueObject(action=ACTION_SAVE, key=key, note=cn)
@@ -550,7 +550,7 @@ class NotesDB(utils.SubjectMixin):
             else:
                 # o (.action, .key, .note) is something that was written to disk
                 # we only record the savedate.
-                self.notes[o.key].savedate = o.notesavedate # TODO: Probably broken
+                self.notes[o.key].savedate = o.note.savedate  # TODO: Probably broken
                 self.notify_observers('change:note-status', utils.KeyValueObject(what='savedate', key=o.key))
                 nsaved += 1
 
