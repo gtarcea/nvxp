@@ -6,7 +6,6 @@ import codecs
 import copy
 import glob
 import os
-import json
 import logging
 from Queue import Queue, Empty
 import re
