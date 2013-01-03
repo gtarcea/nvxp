@@ -21,7 +21,7 @@ def generate_random_key():
 
 
 def get_note_title(note):
-    mo = note_title_re.match(note.get('title', ''))
+    mo = note_title_re.match(note.title)
     if mo:
         return mo.groups()[0]
     else:
@@ -32,7 +32,7 @@ def get_note_title_file(note, note_extension):
     """
     @type note_extension: basestring
     """
-    mo = note_title_re.match(note.get('title', ''))
+    mo = note_title_re.match(note.title)
     if mo:
         fn = mo.groups()[0]
         fn = fn.replace(' ', '_')
@@ -86,27 +86,29 @@ def human_date(timestamp):
 
 
 def note_pinned(n):
-    asystags = n.get('systemtags', 0)
-    # no systemtag at all
-    if not asystags:
-        return 0
+    return 0
+    # asystags = n.get('systemtags', 0)
+    # # no systemtag at all
+    # if not asystags:
+    #     return 0
 
-    if 'pinned' in asystags:
-        return 1
-    else:
-        return 0
+    # if 'pinned' in asystags:
+    #     return 1
+    # else:
+    #     return 0
 
 
 def note_markdown(n):
-    asystags = n.get('systemtags', 0)
-    # no systemtag at all
-    if not asystags:
-        return 0
+    return 0
+    # asystags = n.get('systemtags', 0)
+    # # no systemtag at all
+    # if not asystags:
+    #     return 0
 
-    if 'markdown' in asystags:
-        return 1
-    else:
-        return 0
+    # if 'markdown' in asystags:
+    #     return 1
+    # else:
+    #     return 0
 
 tags_illegal_chars = re.compile(r'[\s]')
 
@@ -149,7 +151,7 @@ def sort_by_modify_date_pinned(a, b):
     elif not note_pinned(a.note) and note_pinned(b.note):
         return -1
     else:
-        return cmp(float(a.note.get('modifydate', 0)), float(b.note.get('modifydate', 0)))
+        return cmp(float(a.note.modifydate), float(b.note.modifydate))
 
 
 def check_internet_on():

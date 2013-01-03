@@ -154,7 +154,8 @@ def _serialize_note_2_json(note):
         '__class__': note.__class__.__name__,
         '__module__': note.__module__
     }
-    d.update(note.__dict__)
+    note_dictionary_no_content_field = {key: value for (key, value) in note.__dict__.items() if key != 'content'}
+    d.update(note_dictionary_no_content_field)
     return d
 
 
@@ -162,15 +163,18 @@ def note_2_json(note):
     return json.dumps(note, default=_serialize_note_2_json)
 
 
+def note_2_jsonfile(note, filename):
+    with open(filename, 'wb') as fp:
+        return json.dump(note, fp, default=_serialize_note_2_json)
+
+
 def _dict_to_object(d):
     if '__class__' in d:
         class_name = d.pop('__class__')
         module_name = d.pop('__module__')
-        print module_name
         module = __import__(module_name)
         class_ = getattr(module, class_name)
         args = dict((key.encode('ascii'), value) for key, value in d.items())
-        print args
         inst = class_(**args)
     else:
         inst = d
@@ -179,3 +183,8 @@ def _dict_to_object(d):
 
 def json_2_note(json_):
     return json.loads(json_, object_hook=_dict_to_object)
+
+
+def jsonfile_2_note(filename):
+    with open(filename, 'rb') as fp:
+        return json.load(fp, object_hook=_dict_to_object)
