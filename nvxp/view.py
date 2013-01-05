@@ -1050,7 +1050,7 @@ class View(utils.SubjectMixin):
                                   font=f, tabs=(4 * f.measure(0), 'left'), tabstyle='wordprocessor',
                                   yscrollcommand=yscrollbar.set,
                                   undo=True,
-                                  background = self.config.background_color)
+                                  background=self.config.background_color)
             # change default font at runtime with:
             text.config(font=f)
 
@@ -1096,22 +1096,7 @@ class View(utils.SubjectMixin):
 
         # ascii art created with: http://patorjk.com/software/taag/
 
-        msg = """
-        No note currently selected.
-
-        Either select a note, or press Ctrl-N to create
-        a new note titled with the current search string,
-        or modify the search string.
-
-        .__   __. ____    ____ .______   ____    ____
-        |  \ |  | \   \  /   / |   _  \  \   \  /   /
-        |   \|  |  \   \/   /  |  |_)  |  \   \/   /
-        |  . `  |   \      /   |   ___/    \_    _/
-        |  |\   |    \    /    |  |          |  |
-        |__| \__|     \__/     | _|          |__|
-
-
-        """
+        msg = "No note selected."
 
         if silent:
             self.mute_note_data_changes()
