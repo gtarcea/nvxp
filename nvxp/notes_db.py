@@ -394,7 +394,6 @@ class NotesDB(utils.SubjectMixin):
         """
         filtered_notes = []
         active_notes = 0
-        print("searching: %d" % (len(self.notes.values())))
         for note_key in self.notes:
             note = self.notes[note_key]
             if note.deleted:

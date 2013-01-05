@@ -780,6 +780,8 @@ class View(utils.SubjectMixin):
         self.text_note.bind("<Escape>", lambda e: self.notes_list.text.focus())
         # <Key>
 
+        self.text_note.bind("<Control-l>", lambda e: self.search_entry.focus())
+
         self.text_note.bind("<Control-a>", self.cmd_select_all)
 
         self.tags_entry_var.trace('w', self.handler_tags_entry)
