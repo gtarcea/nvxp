@@ -1,4 +1,6 @@
-# nvPY: cross-platform note-taking app with simplenote syncing
+# nvxp: An opinionated cross-platform note-taking app based on notational velocity
+#
+# Originally based on nvPY developed by
 # copyright 2012 by Charl P. Botha <cpbotha@vxlabs.com>
 # new BSD license
 

@@ -10,19 +10,19 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "nvpy",
-    version = nvpy.VERSION,
-    author = "Charl P. Botha",
-    author_email = "cpbotha@vxlabs.com",
+    name = "nvxp",
+    version = nvxp.VERSION,
+    author = "V. Glenn Tarcea",
+    author_email = "glenn.tarcea@gmail.com",
     description = "A cross-platform simplenote-syncing note-taking app inspired by Notational Velocity.",
     license = "BSD",
     keywords = "simplenote note-taking tkinter nvalt markdown",
-    url = "https://github.com/cpbotha/nvpy",
-    packages=['nvpy'],
+    url = "https://github.com/gtarcea/nvxp",
+    packages=['nvxp'],
     long_description=read('README.rst'),
     install_requires = ['Markdown', 'docutils'],
     entry_points = {
-        'gui_scripts' : ['nvpy = nvpy.nvpy:main']
+        'gui_scripts' : ['nvxp = nvxp.nv:main']
     },
     # use MANIFEST.in file
     # because package_data is ignored during sdist

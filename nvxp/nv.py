@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# nvPY: cross-platform note-taking app with simplenote syncing
+# nvxp: cross-platform note-taking app with simplenote syncing
 # copyright 2012 by Charl P. Botha <cpbotha@vxlabs.com>
 # new BSD license
 
@@ -311,7 +311,7 @@ class Controller:
 
         elif not self.config.ok:
             wmsg = ('Please rename [default] to [nvpy] in %s. ' +
-                    'Config file format changed after nvPY 0.8.') % \
+                    'Config file format changed after nvxp 0.8.') % \
                 (str(self.config.files_read),)
             self.view.show_warning('Rename config section', wmsg)
 

@@ -1,4 +1,4 @@
-# nvPY: cross-platform note-taking app with simplenote syncing
+# nvxp: cross-platform note-taking app with simplenote syncing
 # copyright 2012 by Charl P. Botha <cpbotha@vxlabs.com>
 # new BSD license
 
@@ -911,10 +911,10 @@ class View(utils.SubjectMixin):
         TEXT_WIDTH = 80
 
         # set the correct class name. this helps your desktop environment
-        # to identify the nvPY window.
-        self.root = tk.Tk(className="nvPY")
+        # to identify the nvxp window.
+        self.root = tk.Tk(className="nv")
 
-        self.root.title("nvPY")
+        self.root.title("nvxp")
         #self.root.configure(background="#b2b2b2")
 
         # with iconphoto we have to use gif, also on windows
@@ -937,7 +937,7 @@ class View(utils.SubjectMixin):
         # first pack this before panedwindow, else behaviour is unexpected
         # during sash moving and resizing
         self.statusbar = StatusBar(self.root)
-        self.statusbar.set_status('%s', 'Welcome to nvPY!')
+        self.statusbar.set_status('%s', 'Welcome to nvxp!')
         self.statusbar.pack(fill=tk.X, side=tk.BOTTOM, padx=3, pady=3)
 
         search_frame = tk.Frame(self.root)
@@ -1146,7 +1146,7 @@ class View(utils.SubjectMixin):
 
         tkMessageBox.showinfo(
             'Help | About',
-            'nvPY %s is copyright 2012 by Charl P. Botha '
+            'nvxp %s is copyright 2012 by Charl P. Botha '
             '<http://charlbotha.com/>\n\n'
             'A rather ugly but cross-platform simplenote client.' % (
                 self.config.app_version,),
@@ -1174,7 +1174,7 @@ class View(utils.SubjectMixin):
                               utils.KeyValueObject(value=self.cs_checkbutton_var.get()))
 
     def handler_housekeeper(self):
-        # nvPY will do saving and syncing!
+        # nvxp will do saving and syncing!
         self.notify_observers('keep:house', None)
 
         # check if titles need refreshing

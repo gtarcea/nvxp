@@ -13,7 +13,7 @@ Ctrl-G     Edit tags for currently selected note. Press ESC to return to note
            editing.
 Ctrl-M     Render Markdown note to HTML and open browser window.
 Ctrl-N     Create new note.
-Ctrl-Q     Exit nvPY.
+Ctrl-Q     Exit nvxp.
 Ctrl-R     Render reStructuredText (reST) note to HTML and open browser window.
 Ctrl-S     Force sync of current note with simplenote server. Saving to disc
            and syncing to server also happen continuously in the background.
