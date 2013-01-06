@@ -1,0 +1,22 @@
+File Menu Refactor:
+	Methods to Move Over:
+		- cmd_root_new @done(13-01-05)
+		- cmd_root_delete @done(13-01-05)
+		- cmd_external_edit @done(13-01-05)
+		- cmd_sync_full @done(13-01-05)
+		- cmd_sync_current_note @done(13-01-05)
+		- cmd_markdown @done(13-01-05)
+		- cmd_rest @done(13-01-05)
+		- handler_close @done(13-01-05)
+		This is kind of ugly, I assume that self.root has the handler_close method.
+
+	Other Items:
+		- Need to deal with continuous_rendering attribute @done(13-01-05)
+		Places where the get_continuous_rendering method are used
+			nv.py: if self.view.get_continuous_rendering()
+			view.py:    def get_continuous_rendering(self)
+		The solution is to put get_continuous_rendering into NvFileMenu. This is an ugly solution. But this is a step forward in refactoring the code. First get the simple refactor working.
+
+
+	Additional Cleanup:
+		- Is there a better way to handle handler_close (see note above)

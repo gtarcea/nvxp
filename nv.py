@@ -34,12 +34,12 @@ import codecs
 import ConfigParser
 import logging
 from logging.handlers import RotatingFileHandler
-from notes_db import NotesDB, SyncError, ReadError, WriteError
+from nvxp.notes_db import NotesDB, SyncError, ReadError, WriteError
 import os
 import sys
 
-from utils import SubjectMixin
-import view
+from nvxp.utils import SubjectMixin
+import nvxp.view as view
 import webbrowser
 
 try:

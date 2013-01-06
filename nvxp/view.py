@@ -11,6 +11,7 @@ import tkFont
 import tkMessageBox
 import utils
 import webbrowser
+from gui.menu import NvFileMenu
 
 
 class WidgetRedirector:
@@ -616,22 +617,22 @@ class View(utils.SubjectMixin):
         sidx = self.notes_list.selected_idx
         self.notify_observers('select:note', utils.KeyValueObject(sel=sidx))
 
-    def cmd_root_delete(self, evt=None):
-        sidx = self.notes_list.selected_idx
-        self.notify_observers('delete:note', utils.KeyValueObject(sel=sidx))
+    # def cmd_root_delete(self, evt=None):
+    #     sidx = self.notes_list.selected_idx
+    #     self.notify_observers('delete:note', utils.KeyValueObject(sel=sidx))
 
-    def cmd_external_edit(self, evt=None):
-        selected_index = self.notes_list.selected_idx
-        self.notify_observers(
-            'external-edit:note', utils.KeyValueObject(sel=selected_index))
+    # def cmd_external_edit(self, evt=None):
+    #     selected_index = self.notes_list.selected_idx
+    #     self.notify_observers(
+    #         'external-edit:note', utils.KeyValueObject(sel=selected_index))
 
-    def cmd_root_new(self, evt=None):
-        # this'll get caught by a controller event handler
-        self.notify_observers('create:note', utils.KeyValueObject(
-            title=self.get_search_entry_text()))
-        # the note will be created synchronously, so we can focus the text area
-        # already
-        self.text_note.focus()
+    # def cmd_root_new(self, evt=None):
+    #     # this'll get caught by a controller event handler
+    #     self.notify_observers('create:note', utils.KeyValueObject(
+    #         title=self.get_search_entry_text()))
+    #     # the note will be created synchronously, so we can focus the text area
+    #     # already
+    #     self.text_note.focus()
 
     def cmd_select_all(self, evt=None):
         self.text_note.tag_add("sel", "1.0", "end-1c")
@@ -802,55 +803,57 @@ class View(utils.SubjectMixin):
         menu = tk.Menu(self.root)
         self.root.config(menu=menu)
 
-        file_menu = tk.Menu(menu, tearoff=False)
+        #file_menu = tk.Menu(menu, tearoff=False)
+        file_menu = NvFileMenu(self.root, menu, self, tearoff=False)
         menu.add_cascade(label="File", underline='0', menu=file_menu)
 
         # FILE ##########################################################
-        file_menu.add_command(label="New note", underline=0,
-                              command=self.cmd_root_new, accelerator="Ctrl+N")
-        self.root.bind_all("<Control-n>", self.cmd_root_new)
 
-        file_menu.add_command(label="Delete note", underline=0,
-                              command=self.cmd_root_delete, accelerator="Ctrl+D")
-        self.root.bind_all("<Control-d>", self.cmd_root_delete)
+        # file_menu.add_command(label="New note", underline=0,
+        #                       command=self.cmd_root_new, accelerator="Ctrl+N")
+        # self.root.bind_all("<Control-n>", self.cmd_root_new)
 
-        file_menu.add_command(label="Edit note", underline=0,
-                              command=self.cmd_external_edit, accelerator="Ctrl+E")
-        self.root.bind_all("<Control-e>", self.cmd_external_edit)
+        # file_menu.add_command(label="Delete note", underline=0,
+        #                       command=self.cmd_root_delete, accelerator="Ctrl+D")
+        # self.root.bind_all("<Control-d>", self.cmd_root_delete)
 
-        file_menu.add_separator()
+        # file_menu.add_command(label="Edit note", underline=0,
+        #                       command=self.cmd_external_edit, accelerator="Ctrl+E")
+        # self.root.bind_all("<Control-e>", self.cmd_external_edit)
 
-        file_menu.add_command(label="Sync full", underline=5,
-                              command=self.cmd_sync_full, accelerator="Ctrl+Shift+S")
-        self.root.bind_all("<Control-S>", self.cmd_sync_full)
+        # file_menu.add_separator()
 
-        file_menu.add_command(label="Sync current note",
-                              underline=0, command=self.cmd_sync_current_note,
-                              accelerator="Ctrl+S")
-        self.root.bind_all("<Control-s>", self.cmd_sync_current_note)
+        # file_menu.add_command(label="Sync full", underline=5,
+        #                       command=self.cmd_sync_full, accelerator="Ctrl+Shift+S")
+        # self.root.bind_all("<Control-S>", self.cmd_sync_full)
 
-        file_menu.add_separator()
+        # file_menu.add_command(label="Sync current note",
+        #                       underline=0, command=self.cmd_sync_current_note,
+        #                       accelerator="Ctrl+S")
+        # self.root.bind_all("<Control-s>", self.cmd_sync_current_note)
 
-        file_menu.add_command(label="Render Markdown to HTML", underline=7,
-                              command=self.cmd_markdown, accelerator="Ctrl+M")
-        self.root.bind_all("<Control-m>", self.cmd_markdown)
+        # file_menu.add_separator()
 
-        self.continuous_rendering = tk.BooleanVar()
-        self.continuous_rendering.set(False)
-        file_menu.add_checkbutton(
-            label="Continuous Markdown to HTML rendering",
-            onvalue=True, offvalue=False,
-            variable=self.continuous_rendering)
+        # file_menu.add_command(label="Render Markdown to HTML", underline=7,
+        #                       command=self.cmd_markdown, accelerator="Ctrl+M")
+        # self.root.bind_all("<Control-m>", self.cmd_markdown)
 
-        file_menu.add_command(label="Render reST to HTML", underline=7,
-                              command=self.cmd_rest, accelerator="Ctrl+R")
-        self.root.bind_all("<Control-r>", self.cmd_rest)
+        # self.continuous_rendering = tk.BooleanVar()
+        # self.continuous_rendering.set(False)
+        # file_menu.add_checkbutton(
+        #     label="Continuous Markdown to HTML rendering",
+        #     onvalue=True, offvalue=False,
+        #     variable=self.continuous_rendering)
 
-        file_menu.add_separator()
+        # file_menu.add_command(label="Render reST to HTML", underline=7,
+        #                       command=self.cmd_rest, accelerator="Ctrl+R")
+        # self.root.bind_all("<Control-r>", self.cmd_rest)
 
-        file_menu.add_command(label="Exit", underline=1,
-                              command=self.handler_close, accelerator="Ctrl+Q")
-        self.root.bind_all("<Control-q>", self.handler_close)
+        # file_menu.add_separator()
+
+        # file_menu.add_command(label="Exit", underline=1,
+        #                       command=self.handler_close, accelerator="Ctrl+Q")
+        # self.root.bind_all("<Control-q>", self.handler_close)
 
         # EDIT ##########################################################
         edit_menu = tk.Menu(menu, tearoff=False)
@@ -1078,10 +1081,10 @@ class View(utils.SubjectMixin):
     def get_number_of_notes(self):
         return self.notes_list.get_number_of_notes()
 
-    def handler_close(self, evt=None):
-        """Handler for exit menu command and close window event.
-        """
-        self.notify_observers('close', None)
+    # def handler_close(self, evt=None):
+    #     """Handler for exit menu command and close window event.
+    #     """
+    #     self.notify_observers('close', None)
 
     def clear_note_ui(self, silent=True):
         """Called when no note has been selected.
@@ -1123,8 +1126,8 @@ class View(utils.SubjectMixin):
     def cmd_copy(self):
         self.text_note.event_generate('<<Copy>>')
 
-    def cmd_markdown(self, event=None):
-        self.notify_observers('command:markdown', None)
+    # def cmd_markdown(self, event=None):
+    #     self.notify_observers('command:markdown', None)
 
     def cmd_paste(self):
         self.text_note.event_generate('<<Paste>>')
@@ -1143,14 +1146,14 @@ class View(utils.SubjectMixin):
         h = HelpBindings()
         self.root.wait_window(h)
 
-    def cmd_rest(self, event=None):
-        self.notify_observers('command:rest', None)
+    # def cmd_rest(self, event=None):
+    #     self.notify_observers('command:rest', None)
 
-    def cmd_sync_current_note(self, event=None):
-        self.notify_observers('command:sync_current_note', None)
+    # def cmd_sync_current_note(self, event=None):
+    #     self.notify_observers('command:sync_current_note', None)
 
-    def cmd_sync_full(self, event=None):
-        self.notify_observers('command:sync_full', None)
+    # def cmd_sync_full(self, event=None):
+    #     self.notify_observers('command:sync_full', None)
 
     def cmd_font_size(self, inc_size):
         for f in self.fonts:
