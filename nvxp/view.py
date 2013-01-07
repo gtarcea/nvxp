@@ -11,7 +11,7 @@ import tkFont
 import tkMessageBox
 import utils
 import webbrowser
-from gui.menu import NvFileMenu
+from gui.menu import NvFileMenu, NvEditMenu, NvToolsMenu, NvHelpMenu
 
 
 class WidgetRedirector:
@@ -617,23 +617,7 @@ class View(utils.SubjectMixin):
         sidx = self.notes_list.selected_idx
         self.notify_observers('select:note', utils.KeyValueObject(sel=sidx))
 
-    # def cmd_root_delete(self, evt=None):
-    #     sidx = self.notes_list.selected_idx
-    #     self.notify_observers('delete:note', utils.KeyValueObject(sel=sidx))
-
-    # def cmd_external_edit(self, evt=None):
-    #     selected_index = self.notes_list.selected_idx
-    #     self.notify_observers(
-    #         'external-edit:note', utils.KeyValueObject(sel=selected_index))
-
-    # def cmd_root_new(self, evt=None):
-    #     # this'll get caught by a controller event handler
-    #     self.notify_observers('create:note', utils.KeyValueObject(
-    #         title=self.get_search_entry_text()))
-    #     # the note will be created synchronously, so we can focus the text area
-    #     # already
-    #     self.text_note.focus()
-
+    # TODO: This is duplicated in NvEditMenu
     def cmd_select_all(self, evt=None):
         self.text_note.tag_add("sel", "1.0", "end-1c")
         # we don't want the text bind_class() handler for Ctrl-A to be fired.
@@ -803,102 +787,20 @@ class View(utils.SubjectMixin):
         menu = tk.Menu(self.root)
         self.root.config(menu=menu)
 
-        #file_menu = tk.Menu(menu, tearoff=False)
         nv_file_menu = NvFileMenu(self.root, menu, self)
         file_menu = nv_file_menu.file_menu
         self.continuous_rendering = nv_file_menu.continuous_rendering
         menu.add_cascade(label="File", underline='0', menu=file_menu)
 
-        # FILE ##########################################################
-
-        # file_menu.add_command(label="New note", underline=0,
-        #                       command=self.cmd_root_new, accelerator="Ctrl+N")
-        # self.root.bind_all("<Control-n>", self.cmd_root_new)
-
-        # file_menu.add_command(label="Delete note", underline=0,
-        #                       command=self.cmd_root_delete, accelerator="Ctrl+D")
-        # self.root.bind_all("<Control-d>", self.cmd_root_delete)
-
-        # file_menu.add_command(label="Edit note", underline=0,
-        #                       command=self.cmd_external_edit, accelerator="Ctrl+E")
-        # self.root.bind_all("<Control-e>", self.cmd_external_edit)
-
-        # file_menu.add_separator()
-
-        # file_menu.add_command(label="Sync full", underline=5,
-        #                       command=self.cmd_sync_full, accelerator="Ctrl+Shift+S")
-        # self.root.bind_all("<Control-S>", self.cmd_sync_full)
-
-        # file_menu.add_command(label="Sync current note",
-        #                       underline=0, command=self.cmd_sync_current_note,
-        #                       accelerator="Ctrl+S")
-        # self.root.bind_all("<Control-s>", self.cmd_sync_current_note)
-
-        # file_menu.add_separator()
-
-        # file_menu.add_command(label="Render Markdown to HTML", underline=7,
-        #                       command=self.cmd_markdown, accelerator="Ctrl+M")
-        # self.root.bind_all("<Control-m>", self.cmd_markdown)
-
-        # self.continuous_rendering = tk.BooleanVar()
-        # self.continuous_rendering.set(False)
-        # file_menu.add_checkbutton(
-        #     label="Continuous Markdown to HTML rendering",
-        #     onvalue=True, offvalue=False,
-        #     variable=self.continuous_rendering)
-
-        # file_menu.add_command(label="Render reST to HTML", underline=7,
-        #                       command=self.cmd_rest, accelerator="Ctrl+R")
-        # self.root.bind_all("<Control-r>", self.cmd_rest)
-
-        # file_menu.add_separator()
-
-        # file_menu.add_command(label="Exit", underline=1,
-        #                       command=self.handler_close, accelerator="Ctrl+Q")
-        # self.root.bind_all("<Control-q>", self.handler_close)
-
         # EDIT ##########################################################
-        edit_menu = tk.Menu(menu, tearoff=False)
+        nv_edit_menu = NvEditMenu(self.root, menu, self)
+        edit_menu = nv_edit_menu.edit_menu
         menu.add_cascade(label="Edit", underline=0, menu=edit_menu)
 
-        edit_menu.add_command(label="Undo", accelerator="Ctrl+Z",
-                              underline=0, command=lambda: self.text_note.edit_undo())
-        self.root.bind_all("<Control-z>", lambda e: self.text_note.edit_undo())
-
-        edit_menu.add_command(label="Redo", accelerator="Ctrl+Y",
-                              underline=0, command=lambda: self.text_note.edit_undo())
-        self.root.bind_all("<Control-y>", lambda e: self.text_note.edit_redo())
-
-        edit_menu.add_separator()
-
-        edit_menu.add_command(label="Cut", accelerator="Ctrl+X",
-                              underline=2, command=self.cmd_cut)
-        edit_menu.add_command(label="Copy", accelerator="Ctrl+C",
-                              underline=0, command=self.cmd_copy)
-        edit_menu.add_command(label="Paste", accelerator="Ctrl+V",
-                              underline=0, command=self.cmd_paste)
-
-        edit_menu.add_command(label="Select All", accelerator="Ctrl+A",
-                              underline=7, command=self.cmd_select_all)
-        # FIXME: ctrl-a is usually bound to start-of-line. What's a
-        # better binding for select all then?
-
-        edit_menu.add_separator()
-
-        edit_menu.add_command(label="Find", accelerator="Ctrl+F",
-                              underline=0, command=lambda: self.search_entry.focus())
-        self.root.bind_all("<Control-f>", lambda e: self.search_entry.focus())
-
         # TOOLS ########################################################
-        tools_menu = tk.Menu(menu, tearoff=False)
+        nv_tools_menu = NvToolsMenu(menu, self)
+        tools_menu = nv_tools_menu.tools_menu
         menu.add_cascade(label="Tools", underline=0, menu=tools_menu)
-
-        tools_menu.add_command(label="Word Count",
-                               underline=0, command=self.word_count)
-
-        # the internet thinks that multiple modifiers should work, but this didn't
-        # want to.
-        #self.root.bind_all("<Control-Shift-c>", lambda e: self.word_count())
 
         # HELP ##########################################################
         help_menu = tk.Menu(menu, tearoff=False)
@@ -1122,18 +1024,6 @@ class View(utils.SubjectMixin):
         """
         self.root.destroy()
 
-    def cmd_cut(self):
-        self.text_note.event_generate('<<Cut>>')
-
-    def cmd_copy(self):
-        self.text_note.event_generate('<<Copy>>')
-
-    # def cmd_markdown(self, event=None):
-    #     self.notify_observers('command:markdown', None)
-
-    def cmd_paste(self):
-        self.text_note.event_generate('<<Paste>>')
-
     def cmd_help_about(self):
 
         tkMessageBox.showinfo(
@@ -1147,15 +1037,6 @@ class View(utils.SubjectMixin):
     def cmd_help_bindings(self):
         h = HelpBindings()
         self.root.wait_window(h)
-
-    # def cmd_rest(self, event=None):
-    #     self.notify_observers('command:rest', None)
-
-    # def cmd_sync_current_note(self, event=None):
-    #     self.notify_observers('command:sync_current_note', None)
-
-    # def cmd_sync_full(self, event=None):
-    #     self.notify_observers('command:sync_full', None)
 
     def cmd_font_size(self, inc_size):
         for f in self.fonts:
@@ -1554,16 +1435,3 @@ class View(utils.SubjectMixin):
 
         # reactivate event handlers
         self.unmute_note_data_changes()
-
-    def word_count(self):
-        """
-        Display count of total words and selected words in a dialog box.
-        """
-
-        sel = self.get_selected_text()
-        slen = len(sel.split())
-
-        txt = self.get_text()
-        tlen = len(txt.split())
-
-        self.show_info('Word Count', '%d words in total\n%d words in selection' % (tlen, slen))

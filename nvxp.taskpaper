@@ -20,3 +20,24 @@ File Menu Refactor:
 
 	Additional Cleanup:
 		- Is there a better way to handle handler_close (see note above)
+
+Edit Menu Refactor:
+	Methods to Move Over:
+		- cmd_cut @done(13-01-06)
+		- cmd_copy @done(13-01-06)
+		- cmd_paste @done(13-01-06)
+		- cmd_select_all @done(13-01-06)
+
+Tools Menu Refactor:
+	Methods to move over:
+		- word_count @done(13-01-06)
+	- Remove commented out code @done(13-01-06)
+
+Help Menu Refactor:
+	- Need root passed into __init__
+	- Need config passed into __init__
+	Methods to move over:
+		- cmd_help_bindings
+		- cmd_help_about
+	- Remove commented out code
+

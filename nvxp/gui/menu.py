@@ -3,14 +3,6 @@ from .. import tk
 from .. import utils
 
 
-class NvMenu(tk.Menu, object):
-    """The base Menu class"""
-
-    def __init__(self, view, menu_bar, **kw):
-        super(NvMenu, self).__init__(self, menu_bar, **kw)
-        self.view = view
-
-
 class NvFileMenu(object):
     def __init__(self, root, menu_bar, view):
         self.view = view
@@ -96,17 +88,100 @@ class NvFileMenu(object):
         return self.continuous_rendering.get()
 
 
-class NvEditMenu(tk.Menu):
-    pass
+class NvEditMenu(object):
+    def __init__(self, root, menu_bar, view):
+        self.view = view
+        self.root = root
+
+        self.edit_menu = tk.Menu(menu_bar, tearoff=False)
+
+        self.edit_menu.add_command(label="Undo", accelerator="Ctrl+Z",
+                              underline=0, command=lambda: self.view.text_note.edit_undo())
+        self.root.bind_all("<Control-z>", lambda e: self.view.text_note.edit_undo())
+
+        self.edit_menu.add_command(label="Redo", accelerator="Ctrl+Y",
+                              underline=0, command=lambda: self.view.text_note.edit_undo())
+        self.root.bind_all("<Control-y>", lambda e: self.view.text_note.edit_redo())
+
+        self.edit_menu.add_separator()
+
+        self.edit_menu.add_command(label="Cut", accelerator="Ctrl+X",
+                              underline=2, command=self.cmd_cut)
+        self.edit_menu.add_command(label="Copy", accelerator="Ctrl+C",
+                              underline=0, command=self.cmd_copy)
+        self.edit_menu.add_command(label="Paste", accelerator="Ctrl+V",
+                              underline=0, command=self.cmd_paste)
+
+        # FIXME: ctrl-a is usually bound to start-of-line. What's a
+        # better binding for select all then?
+        self.edit_menu.add_command(label="Select All", accelerator="Ctrl+A",
+                              underline=7, command=self.cmd_select_all)
+
+        self.edit_menu.add_separator()
+
+        self.edit_menu.add_command(label="Find", accelerator="Ctrl+F",
+                              underline=0, command=lambda: self.view.search_entry.focus())
+        self.root.bind_all("<Control-f>", lambda e: self.view.search_entry.focus())
+
+    def cmd_cut(self):
+        self.view.text_note.event_generate('<<Cut>>')
+
+    def cmd_copy(self):
+        self.view.text_note.event_generate('<<Copy>>')
+
+    def cmd_paste(self):
+        self.view.text_note.event_generate('<<Paste>>')
+
+    def cmd_select_all(self, evt=None):
+        self.view.text_note.tag_add("sel", "1.0", "end-1c")
+        # we don't want the text bind_class() handler for Ctrl-A to be fired.
+        return "break"
 
 
-class NvToolsMenus(tk.Menu):
-    pass
+class NvToolsMenu(object):
+    def __init__(self, menu_bar, view):
+        self.view = view
+        self.tools_menu = tk.Menu(menu_bar, tearoff=False)
+        self.tools_menu.add_command(label="Word Count",
+                               underline=0, command=self.word_count)
+        # the internet thinks that multiple modifiers should work, but this didn't
+        # want to.
+        #self.root.bind_all("<Control-Shift-c>", lambda e: self.word_count())
+
+    def word_count(self):
+        """
+        Display count of total words and selected words in a dialog box.
+        """
+
+        selected_text = self.get_selected_text()
+        selected_text_length = len(selected_text.split())
+
+        txt = self.get_text()
+        text_length = len(txt.split())
+
+        self.view.show_info('Word Count', '%d words in total\n%d words in selection' % (text_length, selected_text_length))
 
 
-class NvHelpMenu(tk.Menu):
-    pass
+class NvHelpMenu(object):
+    def __init__(self, menu_bar, view):
+        self.view = view
+        self.help_menu = tk.Menu(menu_bar, tearoff=False)
+        self.help_menu.add_command(label="About", underline=0,
+                              command=self.cmd_help_about)
+        self.help_menu.add_command(label="Bindings", underline=0,
+                              command=self.cmd_help_bindings,
+                              accelerator="Ctrl+?")
 
+    def cmd_help_about(self):
+        tkMessageBox.showinfo(
+            'Help | About',
+            'nvxp %s is copyright 2012 by Charl P. Botha '
+            '<http://charlbotha.com/>\n\n'
+            'A rather ugly but cross-platform simplenote client.' % (
+                self.config.app_version,),
+            parent=self.root)
 
-class NvMainMenu(tk.Menu):
-    pass
+    def cmd_help_bindings(self):
+        h = HelpBindings()
+        self.root.wait_window(h)
+
