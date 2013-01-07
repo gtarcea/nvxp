@@ -804,7 +804,9 @@ class View(utils.SubjectMixin):
         self.root.config(menu=menu)
 
         #file_menu = tk.Menu(menu, tearoff=False)
-        file_menu = NvFileMenu(self.root, menu, self, tearoff=False)
+        nv_file_menu = NvFileMenu(self.root, menu, self)
+        file_menu = nv_file_menu.file_menu
+        self.continuous_rendering = nv_file_menu.continuous_rendering
         menu.add_cascade(label="File", underline='0', menu=file_menu)
 
         # FILE ##########################################################
@@ -1081,10 +1083,10 @@ class View(utils.SubjectMixin):
     def get_number_of_notes(self):
         return self.notes_list.get_number_of_notes()
 
-    # def handler_close(self, evt=None):
-    #     """Handler for exit menu command and close window event.
-    #     """
-    #     self.notify_observers('close', None)
+    def handler_close(self, evt=None):
+        """Handler for exit menu command and close window event.
+        """
+        self.notify_observers('close', None)
 
     def clear_note_ui(self, silent=True):
         """Called when no note has been selected.
