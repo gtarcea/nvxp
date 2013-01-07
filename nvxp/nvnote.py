@@ -168,23 +168,23 @@ def note_2_jsonfile(note, filename):
         return json.dump(note, fp, default=_serialize_note_2_json)
 
 
-def _dict_to_object(d):
+def _dict_to_note_object(d):
     if '__class__' in d:
-        class_name = d.pop('__class__')
-        module_name = d.pop('__module__')
-        module = __import__(module_name)
-        class_ = getattr(module, class_name)
-        args = dict((key.encode('ascii'), value) for key, value in d.items())
-        inst = class_(**args)
+        d.pop('__class__')
+        d.pop('__module__')
+        #module = __import__(module_name)
+        #class_ = getattr(module, class_name)
+        kwargs = dict((key.encode('ascii'), value) for key, value in d.items())
+        inst = Note(**kwargs)
     else:
         inst = d
     return inst
 
 
 def json_2_note(json_):
-    return json.loads(json_, object_hook=_dict_to_object)
+    return json.loads(json_, object_hook=_dict_to_note_object)
 
 
 def jsonfile_2_note(filename):
     with open(filename, 'rb') as fp:
-        return json.load(fp, object_hook=_dict_to_object)
+        return json.load(fp, object_hook=_dict_to_note_object)
