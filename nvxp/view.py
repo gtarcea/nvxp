@@ -116,22 +116,6 @@ class RedirectedText(tk.Text):
         self.event_generate('<<Change>>')
 
 
-class HelpBindings(tk.Toplevel):
-    def __init__(self, parent=None):
-        tk.Toplevel.__init__(self, parent)
-        self.title("Help | Bindings")
-
-        import bindings
-
-        msg = tk.Text(self, width=80, wrap=tk.NONE)
-        msg.insert(tk.END, bindings.description)
-        msg.config(state=tk.DISABLED)
-        msg.pack()
-
-        button = tk.Button(self, text="Dismiss", command=self.destroy)
-        button.pack()
-
-
 #########################################################################
 class StatusBar(tk.Frame):
     """Adapted from the tkinterbook.
@@ -803,16 +787,10 @@ class View(utils.SubjectMixin):
         menu.add_cascade(label="Tools", underline=0, menu=tools_menu)
 
         # HELP ##########################################################
-        help_menu = tk.Menu(menu, tearoff=False)
+        nv_help_menu = NvHelpMenu(self.root, menu, self, self.config.app_version)
+        help_menu = nv_help_menu.help_menu
         menu.add_cascade(label="Help", underline='0', menu=help_menu)
 
-        help_menu.add_command(label="About", underline=0,
-                              command=self.cmd_help_about)
-        help_menu.add_command(label="Bindings", underline=0,
-                              command=self.cmd_help_bindings,
-                              accelerator="Ctrl+?")
-
-        # END MENU ######################################################
     def _create_ui(self):
 
         # these two variables determine the final dimensions of our interface
@@ -1023,20 +1001,6 @@ class View(utils.SubjectMixin):
         Called by controller.
         """
         self.root.destroy()
-
-    def cmd_help_about(self):
-
-        tkMessageBox.showinfo(
-            'Help | About',
-            'nvxp %s is copyright 2012 by Charl P. Botha '
-            '<http://charlbotha.com/>\n\n'
-            'A rather ugly but cross-platform simplenote client.' % (
-                self.config.app_version,),
-            parent=self.root)
-
-    def cmd_help_bindings(self):
-        h = HelpBindings()
-        self.root.wait_window(h)
 
     def cmd_font_size(self, inc_size):
         for f in self.fonts:

@@ -1,6 +1,7 @@
 
 from .. import tk
 from .. import utils
+import tkMessageBox
 
 
 class NvFileMenu(object):
@@ -162,9 +163,27 @@ class NvToolsMenu(object):
         self.view.show_info('Word Count', '%d words in total\n%d words in selection' % (text_length, selected_text_length))
 
 
+class HelpBindings(tk.Toplevel):
+    def __init__(self, parent=None):
+        tk.Toplevel.__init__(self, parent)
+        self.title("Help | Bindings")
+
+        import bindings
+
+        msg = tk.Text(self, width=80, wrap=tk.NONE)
+        msg.insert(tk.END, bindings.description)
+        msg.config(state=tk.DISABLED)
+        msg.pack()
+
+        button = tk.Button(self, text="Dismiss", command=self.destroy)
+        button.pack()
+
+
 class NvHelpMenu(object):
-    def __init__(self, menu_bar, view):
+    def __init__(self, root, menu_bar, view, app_version):
         self.view = view
+        self.app_version = app_version
+        self.root = root
         self.help_menu = tk.Menu(menu_bar, tearoff=False)
         self.help_menu.add_command(label="About", underline=0,
                               command=self.cmd_help_about)
@@ -178,10 +197,9 @@ class NvHelpMenu(object):
             'nvxp %s is copyright 2012 by Charl P. Botha '
             '<http://charlbotha.com/>\n\n'
             'A rather ugly but cross-platform simplenote client.' % (
-                self.config.app_version,),
+                self.app_version,),
             parent=self.root)
 
     def cmd_help_bindings(self):
         h = HelpBindings()
         self.root.wait_window(h)
-
