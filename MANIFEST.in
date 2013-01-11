@@ -1,5 +1,3 @@
 include README.rst
-include nvpy/icons/*
-include nvpy/nvpy-example.cfg
-include nvpy/vxlabs-nvpy.desktop
-
+include icons/*
+include nvxp/nvxp-example.cfg

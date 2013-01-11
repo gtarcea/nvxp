@@ -34,10 +34,38 @@ Tools Menu Refactor:
 	- Remove commented out code @done(13-01-06)
 
 Help Menu Refactor:
-	- Need root passed into __init__
-	- Need config passed into __init__
+	- Need root passed into __init__ @done(13-01-09)
+	- Need config passed into __init__ @done(13-01-09)
 	Methods to move over:
-		- cmd_help_bindings
-		- cmd_help_about
-	- Remove commented out code
+		- cmd_help_bindings @done(13-01-09)
+		- cmd_help_about @done(13-01-09)
+	- Remove commented out code @done(13-01-09)
+
+Text Editor Refactor:
+	Move methods using text_note:
+		- clear_note_ui
+			Depends on
+				self.statusbar
+				self.mute_note_data_changes
+
+		- handler_search_enter
+			Depends on
+				self.notes_list
+				self.notify_observers
+
+		- set_note_data
+			Depends on
+				self.tags_entry_var
+				self.pinned_checkbutton_var
+
+		- update_selected_note_data
+			Depends on
+				self.mute_note_data_changes
+				self.get_text()
+
+		- Do not move
+			- activate_search_string_highlights
+			- activate_links
+
+
 

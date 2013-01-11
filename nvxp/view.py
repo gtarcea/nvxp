@@ -11,112 +11,10 @@ import tkFont
 import tkMessageBox
 import utils
 import webbrowser
+from gui import note_editor
 from gui.menu import NvFileMenu, NvEditMenu, NvToolsMenu, NvHelpMenu
 
 
-class WidgetRedirector:
-
-    """Support for redirecting arbitrary widget subcommands."""
-
-    def __init__(self, widget):
-        self.dict = {}
-        self.widget = widget
-        self.tk = tk = widget.tk
-        w = widget._w
-        self.orig = w + "_orig"
-        tk.call("rename", w, self.orig)
-        tk.createcommand(w, self.dispatch)
-
-    def __repr__(self):
-        return "WidgetRedirector(%s<%s>)" % (self.widget.__class__.__name__,
-                                             self.widget._w)
-
-    def close(self):
-        for name in self.dict.keys():
-            self.unregister(name)
-        widget = self.widget
-        del self.widget
-        orig = self.orig
-        del self.orig
-        tk = widget.tk
-        w = widget._w
-        tk.deletecommand(w)
-        tk.call("rename", orig, w)
-
-    def register(self, name, function):
-        if name in self.dict:
-            previous = dict[name]
-        else:
-            previous = OriginalCommand(self, name)
-        self.dict[name] = function
-        setattr(self.widget, name, function)
-        return previous
-
-    def unregister(self, name):
-        if name in self.dict:
-            function = self.dict[name]
-            del self.dict[name]
-            if hasattr(self.widget, name):
-                delattr(self.widget, name)
-            return function
-        else:
-            return None
-
-    def dispatch(self, cmd, *args):
-        m = self.dict.get(cmd)
-        try:
-            if m:
-                return m(*args)
-            else:
-                return self.tk.call((self.orig, cmd) + args)
-        except tk.TclError:
-            return ""
-
-
-class OriginalCommand:
-
-    def __init__(self, redir, name):
-        self.redir = redir
-        self.name = name
-        self.tk = redir.tk
-        self.orig = redir.orig
-        self.tk_call = self.tk.call
-        self.orig_and_name = (self.orig, self.name)
-
-    def __repr__(self):
-        return "OriginalCommand(%r, %r)" % (self.redir, self.name)
-
-    def __call__(self, *args):
-        return self.tk_call(self.orig_and_name + args)
-
-
-#########################################################################
-class RedirectedText(tk.Text):
-    """We would like to know when the Text widget's contents change.  We can't
-    just override the insert method, we have to make use of some Tk magic.
-    This magic is encapsulated in the idlelib.WidgetRedirector class which
-    we use here.
-    """
-
-    def __init__(self, master=None, cnf={}, **kw):
-        tk.Text.__init__(self, master, cnf, **kw)
-
-        # now attach the redirector
-        self.redir = WidgetRedirector(self)
-        self.orig_insert = self.redir.register("insert", self.new_insert)
-        self.orig_delete = self.redir.register("delete", self.new_delete)
-        self.fonts = [kw['font']]
-
-    def new_insert(self, *args):
-        self.orig_insert(*args)
-        self.event_generate('<<Change>>')
-
-    def new_delete(self, *args):
-        self.orig_delete(*args)
-        self.event_generate('<<Change>>')
-
-
-#########################################################################
 class StatusBar(tk.Frame):
     """Adapted from the tkinterbook.
     """
@@ -795,7 +693,6 @@ class View(utils.SubjectMixin):
 
         # these two variables determine the final dimensions of our interface
         #FRAME_HEIGHT=400
-        TEXT_WIDTH = 80
 
         # set the correct class name. this helps your desktop environment
         # to identify the nvxp window.
@@ -920,36 +817,8 @@ class View(utils.SubjectMixin):
             note_meta_frame, textvariable=self.tags_entry_var)
         self.tags_entry.pack(side=tk.LEFT, fill=tk.X, expand=1, pady=3, padx=3)
 
-        # we'll use this method to create the different edit boxes
-        def create_scrolled_text(master):
-            yscrollbar = tk.Scrollbar(master)
-            yscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-            #f = tkFont.nametofont('TkFixedFont')
-            f = tkFont.Font(family=self.config.font_family,
-                            size=self.config.font_size)
-            # tkFont.families(root) returns list of available font family names
-            # this determines the width of the complete interface (yes)
-            text = RedirectedText(master, height=25, width=TEXT_WIDTH,
-                                  wrap=tk.WORD,
-                                  font=f, tabs=(4 * f.measure(0), 'left'), tabstyle='wordprocessor',
-                                  yscrollcommand=yscrollbar.set,
-                                  undo=True,
-                                  background=self.config.background_color)
-            # change default font at runtime with:
-            text.config(font=f)
-
-            # need expand=1 so that when user resizes window, text widget gets
-            # the extra space
-            text.pack(fill=tk.BOTH, expand=1)
-
-            #xscrollbar.config(command=text.xview)
-            yscrollbar.config(command=text.yview)
-
-            return text
-
         # setup user_text ###############################################
-        self.text_note = create_scrolled_text(note_frame)
+        self.text_note = note_editor.create_scrolled_text(note_frame, self.config)
         self.fonts = self.notes_list.fonts + self.text_note.fonts
 
         # finish UI creation ###########################################
