@@ -404,7 +404,7 @@ class NotesDB(utils.SubjectMixin):
             #
             # Skip searching tags for now
             #
-            content_to_search = note.content + ' ' + note.title
+            content_to_search = note.content.lower() + ' ' + note.title.lower()
             if not search_string:
                 filtered_notes.append(utils.KeyValueObject(
                     key=note_key, note=note, tagfound=0))
