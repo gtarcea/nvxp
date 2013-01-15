@@ -3,6 +3,9 @@ from setuptools import setup
 import nv
 
 
+VERSION = 0.1
+
+
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
@@ -12,7 +15,7 @@ def read(fname):
 
 setup(
     name="nvxp",
-    version=nv.VERSION,
+    version=VERSION,
     author="V. Glenn Tarcea",
     author_email="glenn.tarcea@gmail.com",
     description="A cross-platform simplenote-syncing note-taking app inspired by Notational Velocity.",
@@ -22,9 +25,10 @@ setup(
     packages=['nvxp'],
     long_description=read('README.rst'),
     install_requires=['Markdown', 'docutils'],
-    entry_points={
-        'gui_scripts': ['nv = nv:main']
-    },
+    scripts=[nv],
+    # entry_points={
+    #     'gui_scripts': ['nv = nv:main']
+    # },
     # use MANIFEST.in file
     # because package_data is ignored during sdist
     include_package_data=True,

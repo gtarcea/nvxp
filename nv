@@ -74,6 +74,11 @@ class Config:
         # cross-platform way of getting home dir!
         # http://stackoverflow.com/a/4028943/532513
         home = os.path.abspath(os.path.expanduser('~'))
+        if sys.platform == "darwin":
+            default_editor = "FoldingText"
+        else:
+            default_editor = "retext.py"
+
         defaults = {'app_dir': app_dir,
                     'appdir': app_dir,
                     'home': home,
@@ -97,6 +102,7 @@ class Config:
                     # Filename or filepath to a css file used style the rendered
                     # output; e.g. nvpy.css or /path/to/my.css
                     'rest_css_path': None,
+                    'editor': default_editor
                     }
 
         cp = ConfigParser.SafeConfigParser(defaults)
@@ -146,6 +152,7 @@ class Config:
         self.note_extension = cp.get(cfg_sec, 'note_extension')
 
         self.rest_css_path = cp.get(cfg_sec, 'rest_css_path')
+        self.editor = cp.get(cfg_sec, 'editor')
 
 
 class NotesListModel(SubjectMixin):
@@ -360,7 +367,10 @@ class Controller:
         # Launch external editor
         key = self.get_selected_note_key()
         filepath = self.notes_db.get_note_filepath(key)
-        os.system("open -a FoldingText " + filepath)
+        if sys.platform == "darwin":
+            os.system("open -a " + self.config.editor + " " + filepath)
+        else:
+            os.system(self.config.editor + " " + filepath)
 
     def observer_view_delete_note(self, view, evt_type, evt):
         # delete note from notes_db

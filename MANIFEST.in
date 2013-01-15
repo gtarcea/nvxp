@@ -1,3 +1,4 @@
 include README.rst
 include icons/*
 include nvxp/nvxp-example.cfg
+include nv.py
